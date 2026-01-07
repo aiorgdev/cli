@@ -1,0 +1,52 @@
+{
+  "name": "@aiorg/cli",
+  "version": "1.0.0",
+  "description": "CLI for downloading and upgrading aiorg kits",
+  "type": "module",
+  "bin": {
+    "aiorg": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "keywords": [
+    "aiorg",
+    "cli",
+    "claude",
+    "starter-kit"
+  ],
+  "author": "aiorg.dev",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aiorgdev/cli"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cac": "^6.7.14",
+    "@clack/prompts": "^0.8.2",
+    "picocolors": "^1.1.1",
+    "ora": "^8.1.1",
+    "extract-zip": "^2.0.1",
+    "fs-extra": "^11.2.0",
+    "glob": "^11.0.0",
+    "minimatch": "^10.0.1",
+    "zod": "^3.24.1",
+    "semver": "^7.6.3"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.10.5",
+    "@types/semver": "^7.5.8",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2"
+  }
+}
