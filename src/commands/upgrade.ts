@@ -224,6 +224,12 @@ export async function upgrade(options: UpgradeOptions): Promise<void> {
     )
     logger.blank()
     logger.keyValue('Files updated', String(result.replaced.length))
+    if (result.merged.length > 0) {
+      logger.keyValue('Files merged', String(result.merged.length))
+    }
+    if (result.added.length > 0) {
+      logger.keyValue('Files added', String(result.added.length))
+    }
     logger.keyValue('Files preserved', String(result.skipped.length))
 
     if (result.errors.length > 0) {
