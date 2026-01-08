@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "CLI for downloading and upgrading aiorg kits",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "aiorg": "./dist/index.js"
   },
