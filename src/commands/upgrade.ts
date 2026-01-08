@@ -2,7 +2,7 @@ import * as p from '@clack/prompts'
 import pc from 'picocolors'
 import path from 'path'
 import semver from 'semver'
-import { detectKitInCwd } from '../lib/detect.js'
+import { detectKitInCwd, detectKit } from '../lib/detect.js'
 import { getLicenseKey, isLoggedIn } from '../lib/auth.js'
 import { fetchLatestVersion, getDownloadUrl, downloadFile } from '../lib/api.js'
 import {
@@ -208,12 +208,19 @@ export async function upgrade(options: UpgradeOptions): Promise<void> {
     await extractZipToDir(zipPath, extractPath)
     spinner.stop('Extracted')
 
-    // Apply fileCategories
+    // Read fileCategories from NEW version (extracted), not old local version
+    // This is critical - old kit might not have fileCategories defined
+    const newKit = await detectKit(extractPath)
+    if (!newKit) {
+      throw new Error('Failed to read version.json from downloaded kit')
+    }
+
+    // Apply fileCategories from new version
     spinner.start('Applying updates...')
     const result = await applyFileCategories(
       extractPath,
       kit.rootPath,
-      kit.versionJson
+      newKit.versionJson
     )
     spinner.stop('Updates applied')
 
