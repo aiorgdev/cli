@@ -57,9 +57,23 @@ const VerifyLicenseResponseSchema = z.object({
   error: z.string().optional(),
 })
 
+const ListKitsSchema = z.object({
+  kits: z.array(z.object({
+    name: z.string(),
+    displayName: z.string(),
+    description: z.string().nullable(),
+    tier: z.enum(['free', 'paid']),
+    type: z.enum(['template', 'companion', 'inject']),
+    deployMode: z.string().nullable(),
+    version: z.string(),
+    priceCents: z.number(),
+  }))
+})
+
 export type LatestVersion = z.infer<typeof LatestVersionSchema>
 export type DownloadResponse = z.infer<typeof DownloadResponseSchema>
 export type VerifyLicenseResponse = z.infer<typeof VerifyLicenseResponseSchema>
+export type ListKitsResponse = z.infer<typeof ListKitsSchema>
 
 class APIError extends Error {
   constructor(
@@ -211,6 +225,32 @@ export async function downloadFile(url: string): Promise<ArrayBuffer> {
     }
     throw new APIError(
       `Download failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+    )
+  }
+}
+
+/**
+ * Fetch list of all available kits
+ */
+export async function fetchKitsList(): Promise<ListKitsResponse> {
+  const url = `${API_BASE_URL}/api/kits`
+
+  try {
+    const response = await fetchWithTimeout(url)
+
+    if (!response.ok) {
+      throw new APIError('Failed to fetch kits list', response.status)
+    }
+
+    const data = await response.json()
+    return ListKitsSchema.parse(data)
+  } catch (error) {
+    if (error instanceof APIError) throw error
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new APIError('Request timed out')
+    }
+    throw new APIError(
+      `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`
     )
   }
 }

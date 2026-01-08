@@ -4,6 +4,7 @@ import { logout } from './commands/logout.js'
 import { init } from './commands/init.js'
 import { upgrade } from './commands/upgrade.js'
 import { version } from './commands/version.js'
+import { list } from './commands/list.js'
 import * as logger from './utils/logger.js'
 
 const cli = cac('aiorg')
@@ -55,6 +56,19 @@ cli
       await upgrade(options)
     } catch (error) {
       logger.error(error instanceof Error ? error.message : 'Upgrade failed')
+      process.exit(1)
+    }
+  })
+
+// List command
+cli
+  .command('list', 'Show available kits')
+  .alias('ls')
+  .action(async () => {
+    try {
+      await list()
+    } catch (error) {
+      logger.error(error instanceof Error ? error.message : 'Failed to list kits')
       process.exit(1)
     }
   })
