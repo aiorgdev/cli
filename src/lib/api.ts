@@ -49,7 +49,7 @@ const VerifyLicenseResponseSchema = z.object({
     .array(
       z.object({
         name: z.string(),
-        tier: z.enum(['free', 'paid']),
+        tier: z.enum(['free', 'paid', 'private']),
         purchasedAt: z.string(),
       })
     )

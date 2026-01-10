@@ -7,7 +7,7 @@ const CONFIG_DIR = path.join(os.homedir(), '.aiorg')
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json')
 
 const KitLicenseSchema = z.object({
-  tier: z.enum(['free', 'paid']),
+  tier: z.enum(['free', 'paid', 'private']),
   purchasedAt: z.string(),
 })
 
@@ -124,7 +124,7 @@ export async function clearConfig(): Promise<void> {
  */
 export async function addLicensedKit(
   kitName: string,
-  tier: 'free' | 'paid' = 'paid'
+  tier: 'free' | 'paid' | 'private' = 'paid'
 ): Promise<void> {
   const config = await loadConfig()
   if (!config) {
