@@ -337,7 +337,7 @@ export async function setupProject(
     logger.blank()
     logger.header('Project Setup')
     logger.log(pc.dim('AI Org kits share context through projects.'))
-    logger.log(pc.dim('This helps kits work together and remember your business.'))
+    logger.log(pc.dim('This helps kits work together and share data.'))
     logger.blank()
 
     const newProjectName = await askForNewProject(targetPath, kitName)
@@ -384,23 +384,17 @@ async function askForNewProject(
     return null
   }
 
-  const businessName = await p.text({
-    message: 'Business/product name:',
-    placeholder: 'My Startup',
-    validate: (value) => {
-      if (!value) return 'Business name is required'
-      return undefined
-    },
-  })
+  // Generate default display name from project name (title case)
+  const defaultDisplayName = (projectName as string)
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
 
-  if (p.isCancel(businessName)) {
-    return null
-  }
-
-  // Create the project
+  // Create the project with project name as display name
+  // Business kits can update this later via /setup
   await createProject(
     projectName as string,
-    businessName as string,
+    defaultDisplayName,
     kitName
   )
 
