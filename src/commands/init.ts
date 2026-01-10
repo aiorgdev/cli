@@ -123,5 +123,10 @@ export async function init(
   logger.listItem('claude')
   logger.listItem('/setup')
 
-  p.outro(pc.green('Happy building!'))
+  // Kit-specific outro messages
+  const outroMessages: Record<string, string> = {
+    'investor-os': 'Happy investing!',
+  }
+  const outro = outroMessages[kitName] || 'Happy building!'
+  p.outro(pc.green(outro))
 }
