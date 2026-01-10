@@ -13,6 +13,7 @@ import {
   getFileSizeKB,
 } from '../lib/extract.js'
 import { applyFileCategories, isGitRepo, createGitBackup } from '../lib/apply.js'
+import { needsProjectMigration, migrateToProjectSystem, readAiorgFile, addKitToProject } from '../lib/project.js'
 import * as logger from '../utils/logger.js'
 import { login } from './login.js'
 
@@ -35,6 +36,22 @@ export async function upgrade(options: UpgradeOptions): Promise<void> {
 
   logger.keyValue('Kit', pc.magenta(kit.displayName))
   logger.keyValue('Current version', pc.cyan(`v${kit.version}`))
+
+  // Check if this installation needs project migration
+  if (await needsProjectMigration(kit.rootPath)) {
+    const projectName = await migrateToProjectSystem(kit.rootPath, kit.name)
+    if (!projectName) {
+      // User cancelled migration - that's OK, continue with upgrade
+      logger.blank()
+      logger.log(pc.dim('Skipping project setup. You can run it later.'))
+    }
+  } else {
+    // Already has project, just ensure kit is listed
+    const aiorgFile = await readAiorgFile(kit.rootPath)
+    if (aiorgFile) {
+      await addKitToProject(aiorgFile.project, kit.name)
+    }
+  }
 
   // Check for updates
   const spinner = p.spinner()

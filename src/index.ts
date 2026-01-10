@@ -5,6 +5,7 @@ import { init } from './commands/init.js'
 import { upgrade } from './commands/upgrade.js'
 import { version } from './commands/version.js'
 import { list } from './commands/list.js'
+import { status } from './commands/status.js'
 import * as logger from './utils/logger.js'
 
 const cli = cac('aiorg')
@@ -81,6 +82,18 @@ cli
       await version()
     } catch (error) {
       logger.error(error instanceof Error ? error.message : 'Version check failed')
+      process.exit(1)
+    }
+  })
+
+// Status command
+cli
+  .command('status', 'Show project and kit status')
+  .action(async () => {
+    try {
+      await status()
+    } catch (error) {
+      logger.error(error instanceof Error ? error.message : 'Status check failed')
       process.exit(1)
     }
   })

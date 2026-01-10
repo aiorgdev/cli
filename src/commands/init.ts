@@ -12,6 +12,7 @@ import {
   dirExistsAndNotEmpty,
   getFileSizeKB,
 } from '../lib/extract.js'
+import { setupProject } from '../lib/project.js'
 import * as logger from '../utils/logger.js'
 import { login } from './login.js'
 
@@ -117,6 +118,9 @@ export async function init(
   // Success message
   logger.blank()
   logger.success(`${versionInfo.packageDisplayName} v${versionInfo.version} installed!`)
+
+  // Setup project linking (for kit ecosystem)
+  await setupProject(resolvedPath, kitName)
   logger.blank()
   logger.log('Next steps:')
   logger.listItem(`cd ${resolvedPath}`)
