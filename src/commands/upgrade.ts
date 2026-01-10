@@ -38,18 +38,21 @@ export async function upgrade(options: UpgradeOptions): Promise<void> {
   logger.keyValue('Current version', pc.cyan(`v${kit.version}`))
 
   // Check if this installation needs project migration
-  if (await needsProjectMigration(kit.rootPath)) {
-    const projectName = await migrateToProjectSystem(kit.rootPath, kit.name)
-    if (!projectName) {
-      // User cancelled migration - that's OK, continue with upgrade
-      logger.blank()
-      logger.log(pc.dim('Skipping project setup. You can run it later.'))
-    }
-  } else {
-    // Already has project, just ensure kit is listed
-    const aiorgFile = await readAiorgFile(kit.rootPath)
-    if (aiorgFile) {
-      await addKitToProject(aiorgFile.project, kit.name)
+  // Personal kits (like Investor OS) skip project linking entirely
+  if (!kit.isPersonal) {
+    if (await needsProjectMigration(kit.rootPath)) {
+      const projectName = await migrateToProjectSystem(kit.rootPath, kit.name)
+      if (!projectName) {
+        // User cancelled migration - that's OK, continue with upgrade
+        logger.blank()
+        logger.log(pc.dim('Skipping project setup. You can run it later.'))
+      }
+    } else {
+      // Already has project, just ensure kit is listed
+      const aiorgFile = await readAiorgFile(kit.rootPath)
+      if (aiorgFile) {
+        await addKitToProject(aiorgFile.project, kit.name)
+      }
     }
   }
 

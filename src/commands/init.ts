@@ -13,6 +13,7 @@ import {
   getFileSizeKB,
 } from '../lib/extract.js'
 import { setupProject } from '../lib/project.js'
+import { detectKit } from '../lib/detect.js'
 import * as logger from '../utils/logger.js'
 import { login } from './login.js'
 
@@ -120,7 +121,11 @@ export async function init(
   logger.success(`${versionInfo.packageDisplayName} v${versionInfo.version} installed!`)
 
   // Setup project linking (for kit ecosystem)
-  await setupProject(resolvedPath, kitName)
+  // Personal kits (like Investor OS) skip this - they don't need shared business context
+  const installedKit = await detectKit(resolvedPath)
+  if (!installedKit?.isPersonal) {
+    await setupProject(resolvedPath, kitName)
+  }
   logger.blank()
   logger.log('Next steps:')
   logger.listItem(`cd ${resolvedPath}`)

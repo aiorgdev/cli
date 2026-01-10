@@ -23,6 +23,9 @@ const KitJsonSchema = z.object({
   name: z.string(),
   displayName: z.string().optional(),
   type: z.enum(['bootstrap', 'inject']).optional(),
+  // Personal kits (like Investor OS) don't need project linking
+  // They work standalone without shared business context
+  personal: z.boolean().optional(),
 })
 
 export type VersionJson = z.infer<typeof VersionJsonSchema>
@@ -35,6 +38,8 @@ export interface DetectedKit {
   versionJson: VersionJson
   kitJson?: KitJson
   rootPath: string
+  /** Personal kits don't need project linking (e.g., Investor OS) */
+  isPersonal: boolean
 }
 
 /**
@@ -74,6 +79,7 @@ export async function detectKit(dirPath: string): Promise<DetectedKit | null> {
       versionJson,
       kitJson,
       rootPath: dirPath,
+      isPersonal: kitJson?.personal ?? false,
     }
   } catch {
     return null
