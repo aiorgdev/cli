@@ -63,40 +63,42 @@ export async function upgrade(options: UpgradeOptions): Promise<void> {
     `Update available: ${pc.cyan(`v${kit.version}`)} → ${pc.green(`v${latest.version}`)}`
   )
 
-  // Show changelog
-  if (latest.changelog && latest.changelog[latest.version]) {
-    const entry = latest.changelog[latest.version]
-    logger.blank()
-    logger.header(`What's new in v${latest.version}`)
+  // Show changelog for ALL intermediate versions
+  if (latest.changelog) {
+    // Get all versions between current and latest (exclusive current, inclusive latest)
+    const allVersions = Object.keys(latest.changelog)
+      .filter((v) => semver.gt(v, kit.version) && semver.lte(v, latest.version))
+      .sort((a, b) => semver.rcompare(a, b)) // newest first
 
-    if (entry.highlights && entry.highlights.length > 0) {
-      for (const highlight of entry.highlights) {
-        logger.listItem(highlight)
-      }
-    }
-
-    if (entry.added && entry.added.length > 0) {
+    if (allVersions.length > 0) {
       logger.blank()
-      logger.log(pc.green('Added:'))
-      for (const item of entry.added.slice(0, 5)) {
-        logger.listItem(item)
-      }
-      if (entry.added.length > 5) {
-        logger.log(pc.dim(`  ... and ${entry.added.length - 5} more`))
-      }
-    }
+      const versionCount = allVersions.length
+      logger.header(`Changelog (${versionCount} version${versionCount > 1 ? 's' : ''})`)
 
-    if (entry.changed && entry.changed.length > 0) {
-      logger.blank()
-      logger.log(pc.yellow('Changed:'))
-      for (const item of entry.changed.slice(0, 3)) {
-        logger.listItem(item)
-      }
-    }
+      for (const version of allVersions) {
+        const entry = latest.changelog[version]
+        if (!entry) continue
 
-    if (entry.upgradeNotes) {
-      logger.blank()
-      logger.log(pc.dim('Note: ' + entry.upgradeNotes))
+        // Version header with highlights
+        const highlights = entry.highlights?.join(', ') || ''
+        logger.blank()
+        logger.log(`${pc.green(`v${version}`)}${highlights ? ` - ${pc.white(highlights)}` : ''}`)
+
+        // Show first 2 added items (condensed)
+        if (entry.added && entry.added.length > 0) {
+          for (const item of entry.added.slice(0, 2)) {
+            logger.log(pc.dim(`  + ${item}`))
+          }
+          if (entry.added.length > 2) {
+            logger.log(pc.dim(`  + ... and ${entry.added.length - 2} more`))
+          }
+        }
+
+        // Show upgrade notes if present (important for breaking changes)
+        if (entry.upgradeNotes && version === latest.version) {
+          logger.log(pc.yellow(`  Note: ${entry.upgradeNotes}`))
+        }
+      }
     }
   }
 
