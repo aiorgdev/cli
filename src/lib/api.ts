@@ -32,7 +32,7 @@ const LatestVersionSchema = z.object({
   packageName: z.string(),
   packageDisplayName: z.string(),
   changelog: z.record(z.string(), z.any()).optional(),
-  tier: z.enum(['free', 'paid']).optional(),
+  tier: z.enum(['free', 'paid', 'private']).optional(),
   type: z.enum(['template', 'companion', 'inject']).optional(),
 })
 
@@ -62,7 +62,7 @@ const ListKitsSchema = z.object({
     name: z.string(),
     displayName: z.string(),
     description: z.string().nullable(),
-    tier: z.enum(['free', 'paid']),
+    tier: z.enum(['free', 'paid', 'private']),
     type: z.enum(['template', 'companion', 'inject']),
     deployMode: z.string().nullable(),
     version: z.string(),
