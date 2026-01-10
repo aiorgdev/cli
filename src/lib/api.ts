@@ -32,6 +32,15 @@ const LatestVersionSchema = z.object({
   packageName: z.string(),
   packageDisplayName: z.string(),
   changelog: z.record(z.string(), z.any()).optional(),
+  allVersions: z
+    .array(
+      z.object({
+        version: z.string(),
+        changelog: z.record(z.string(), z.any()).optional(),
+        releasedAt: z.string().optional(),
+      })
+    )
+    .optional(),
   tier: z.enum(['free', 'paid', 'private']).optional(),
   type: z.enum(['template', 'companion', 'inject']).optional(),
 })
