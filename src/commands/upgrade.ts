@@ -66,8 +66,18 @@ export async function upgrade(options: UpgradeOptions): Promise<void> {
   // Show changelog for ALL intermediate versions
   if (latest.changelog) {
     // Get all versions between current and latest (exclusive current, inclusive latest)
+    // Filter out non-semver keys (like "added", "changed" if API returns wrong format)
     const allVersions = Object.keys(latest.changelog)
-      .filter((v) => semver.gt(v, kit.version) && semver.lte(v, latest.version))
+      .filter((v) => {
+        // Must be valid semver
+        if (!semver.valid(v)) return false
+        // Must be greater than current and <= latest
+        try {
+          return semver.gt(v, kit.version) && semver.lte(v, latest.version)
+        } catch {
+          return false
+        }
+      })
       .sort((a, b) => semver.rcompare(a, b)) // newest first
 
     if (allVersions.length > 0) {
