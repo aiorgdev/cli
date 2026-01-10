@@ -1,6 +1,7 @@
 import * as p from '@clack/prompts'
 import pc from 'picocolors'
 import path from 'path'
+import fs from 'fs/promises'
 import semver from 'semver'
 import { detectKitInCwd, detectKit } from '../lib/detect.js'
 import { getLicenseKey, isLoggedIn } from '../lib/auth.js'
@@ -258,6 +259,16 @@ export async function upgrade(options: UpgradeOptions): Promise<void> {
       newKit.versionJson
     )
     spinner.stop('Updates applied')
+
+    // Write upgrade marker for "what's new" on next Claude session
+    const markerPath = path.join(kit.rootPath, '.upgrade-marker.json')
+    const marker = {
+      fromVersion: kit.version,
+      toVersion: latest.version,
+      kitName: kit.packageName,
+      upgradedAt: new Date().toISOString(),
+    }
+    await fs.writeFile(markerPath, JSON.stringify(marker, null, 2))
 
     // Show summary
     logger.blank()
