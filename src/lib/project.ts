@@ -12,15 +12,18 @@ const AiorgFileSchema = z.object({
   version: z.string().optional(),
 })
 
-// Schema for context.json (shared business context)
+// Schema for context.json (shared project context)
+// CLI creates minimal context - kits add their own fields as needed
 const ContextJsonSchema = z.object({
   version: z.string(),
+  // Business info - added by business kits (Idea OS, PMF OS, Marketing OS)
   business: z.object({
     name: z.string(),
     description: z.string().optional(),
     stage: z.enum(['idea', 'building', 'launched', 'pmf', 'scaling']).optional(),
     launchDate: z.string().optional(),
-  }),
+  }).optional(),
+  // Validation data - added by Idea OS
   validation: z.object({
     ideaValidated: z.boolean().optional(),
     ideaScore: z.number().optional(),
@@ -28,6 +31,7 @@ const ContextJsonSchema = z.object({
     valueProp: z.string().optional(),
     validatedAt: z.string().optional(),
   }).optional(),
+  // PMF data - added by PMF OS
   pmf: z.object({
     status: z.enum(['not-started', 'searching', 'approaching', 'achieved']).optional(),
     score: z.number().nullable().optional(),
@@ -116,11 +120,11 @@ export async function projectExists(projectName: string): Promise<boolean> {
 }
 
 /**
- * Create a new project
+ * Create a new project with minimal context
+ * Business kits (Idea OS, PMF OS, Marketing OS) add their own data via /setup
  */
 export async function createProject(
   projectName: string,
-  businessName: string,
   kitName: string
 ): Promise<void> {
   const projectDir = getProjectDir(projectName)
@@ -131,22 +135,10 @@ export async function createProject(
   // Create project directory
   await fs.ensureDir(projectDir)
 
-  // Create context.json
-  const contextJson: ContextJson = {
+  // Create minimal context.json
+  // Kits add business/validation/pmf data as needed
+  const contextJson = {
     version: '1.0.0',
-    business: {
-      name: businessName,
-      stage: 'building',
-    },
-    validation: {},
-    pmf: {
-      status: 'not-started',
-      score: null,
-      seanEllisScore: null,
-      activationRate: null,
-      weeklyRetention: null,
-      measuredAt: null,
-    },
     installedKits: [kitName],
     lastUpdated: new Date().toISOString(),
     updatedBy: kitName,
@@ -275,9 +267,6 @@ export async function setupProject(
       if (context) {
         logger.blank()
         logger.info(`Linked to project: ${pc.cyan(existingAiorg.project)}`)
-        if (context.business?.name) {
-          logger.log(pc.dim(`  Business: ${context.business.name}`))
-        }
         if (context.installedKits && context.installedKits.length > 0) {
           logger.log(pc.dim(`  Installed kits: ${context.installedKits.join(', ')}`))
         }
@@ -384,19 +373,9 @@ async function askForNewProject(
     return null
   }
 
-  // Generate default display name from project name (title case)
-  const defaultDisplayName = (projectName as string)
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-
-  // Create the project with project name as display name
-  // Business kits can update this later via /setup
-  await createProject(
-    projectName as string,
-    defaultDisplayName,
-    kitName
-  )
+  // Create project with minimal context
+  // Business kits (Idea OS, PMF OS, Marketing OS) will ask for business name in /setup
+  await createProject(projectName as string, kitName)
 
   return projectName as string
 }

@@ -62,19 +62,21 @@ describe('Project System', () => {
   })
 
   describe('createProject', () => {
-    it('creates context.json with correct structure', async () => {
-      await createProject(testProjectName, 'Test Business', 'test-kit')
+    it('creates minimal context.json', async () => {
+      await createProject(testProjectName, 'test-kit')
 
       const context = await readProjectContext(testProjectName)
       expect(context).not.toBeNull()
-      expect(context?.business.name).toBe('Test Business')
-      expect(context?.business.stage).toBe('building')
+      expect(context?.version).toBe('1.0.0')
       expect(context?.installedKits).toContain('test-kit')
-      expect(context?.pmf?.status).toBe('not-started')
+      // Minimal context - no business, validation, or pmf data
+      expect(context?.business).toBeUndefined()
+      expect(context?.validation).toBeUndefined()
+      expect(context?.pmf).toBeUndefined()
     })
 
     it('creates learnings.json', async () => {
-      await createProject(testProjectName, 'Test Business', 'test-kit')
+      await createProject(testProjectName, 'test-kit')
 
       const learningsPath = path.join(getProjectDir(testProjectName), 'learnings.json')
       expect(await fs.pathExists(learningsPath)).toBe(true)
@@ -103,7 +105,7 @@ describe('Project System', () => {
 
   describe('addKitToProject', () => {
     it('adds kit to installedKits', async () => {
-      await createProject(testProjectName, 'Test Business', 'kit-1')
+      await createProject(testProjectName, 'kit-1')
       await addKitToProject(testProjectName, 'kit-2')
 
       const context = await readProjectContext(testProjectName)
@@ -112,7 +114,7 @@ describe('Project System', () => {
     })
 
     it('does not duplicate kits', async () => {
-      await createProject(testProjectName, 'Test Business', 'kit-1')
+      await createProject(testProjectName, 'kit-1')
       await addKitToProject(testProjectName, 'kit-1')
       await addKitToProject(testProjectName, 'kit-1')
 
@@ -124,7 +126,7 @@ describe('Project System', () => {
 
   describe('listProjects', () => {
     it('lists created projects', async () => {
-      await createProject(testProjectName, 'Test Business', 'test-kit')
+      await createProject(testProjectName, 'test-kit')
 
       const projects = await listProjects()
       expect(projects).toContain(testProjectName)
