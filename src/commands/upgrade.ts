@@ -64,29 +64,32 @@ export async function upgrade(options: UpgradeOptions): Promise<void> {
   )
 
   // Show changelog for ALL intermediate versions
-  if (latest.changelog) {
-    // Get all versions between current and latest (exclusive current, inclusive latest)
-    // Filter out non-semver keys (like "added", "changed" if API returns wrong format)
-    const allVersions = Object.keys(latest.changelog)
-      .filter((v) => {
-        // Must be valid semver
-        if (!semver.valid(v)) return false
-        // Must be greater than current and <= latest
+  // API returns allVersions array with { version, changelog, releasedAt } objects
+  if (latest.allVersions && Array.isArray(latest.allVersions)) {
+    // Filter versions between current and latest (exclusive current, inclusive latest)
+    const versionsToShow = latest.allVersions
+      .filter((v: { version: string }) => {
+        if (!semver.valid(v.version)) return false
         try {
-          return semver.gt(v, kit.version) && semver.lte(v, latest.version)
+          return semver.gt(v.version, kit.version) && semver.lte(v.version, latest.version)
         } catch {
           return false
         }
       })
-      .sort((a, b) => semver.rcompare(a, b)) // newest first
+      .sort((a: { version: string }, b: { version: string }) =>
+        semver.rcompare(a.version, b.version)
+      ) // newest first
 
-    if (allVersions.length > 0) {
+    if (versionsToShow.length > 0) {
       logger.blank()
-      const versionCount = allVersions.length
+      const versionCount = versionsToShow.length
       logger.header(`Changelog (${versionCount} version${versionCount > 1 ? 's' : ''})`)
 
-      for (const version of allVersions) {
-        const entry = latest.changelog[version]
+      for (const versionEntry of versionsToShow) {
+        const { version, changelog: entry } = versionEntry as {
+          version: string
+          changelog: { highlights?: string[]; added?: string[]; upgradeNotes?: string }
+        }
         if (!entry) continue
 
         // Version header with highlights
