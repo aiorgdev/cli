@@ -25,6 +25,10 @@ async function fetchWithTimeout(
   }
 }
 
+// Shared enums - keep in sync with API
+export const TierSchema = z.enum(['free', 'paid', 'private', 'beta'])
+export const KitTypeSchema = z.enum(['template', 'companion', 'inject'])
+
 // Response schemas
 const LatestVersionSchema = z.object({
   version: z.string(),
@@ -41,8 +45,8 @@ const LatestVersionSchema = z.object({
       })
     )
     .optional(),
-  tier: z.enum(['free', 'paid', 'private']).optional(),
-  type: z.enum(['template', 'companion', 'inject']).optional(),
+  tier: TierSchema.optional(),
+  type: KitTypeSchema.optional(),
 })
 
 const DownloadResponseSchema = z.object({
@@ -54,11 +58,12 @@ const DownloadResponseSchema = z.object({
 const VerifyLicenseResponseSchema = z.object({
   valid: z.boolean(),
   email: z.string().optional(),
+  tier: TierSchema.optional(),
   kits: z
     .array(
       z.object({
         name: z.string(),
-        tier: z.enum(['free', 'paid', 'private']),
+        tier: TierSchema,
         purchasedAt: z.string(),
       })
     )
@@ -71,8 +76,8 @@ const ListKitsSchema = z.object({
     name: z.string(),
     displayName: z.string(),
     description: z.string().nullable(),
-    tier: z.enum(['free', 'paid', 'private']),
-    type: z.enum(['template', 'companion', 'inject']),
+    tier: TierSchema,
+    type: KitTypeSchema,
     deployMode: z.string().nullable(),
     version: z.string(),
     priceCents: z.number(),

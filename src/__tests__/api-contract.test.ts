@@ -4,21 +4,19 @@
  * These tests validate that the production API responses match the CLI's expected schemas.
  * Run before publishing CLI to catch schema mismatches early.
  *
- * Why this matters:
- * - API and CLI have separate schema definitions
- * - Adding a new tier (e.g., 'private') requires updating BOTH
- * - These tests catch when they drift apart
+ * IMPORTANT: Schemas are imported from api.ts to ensure we test the REAL definitions.
+ * Never duplicate schemas here - that's how the beta tier bug happened!
  */
 
-import { describe, test, expect, beforeAll } from 'vitest'
+import { describe, test, expect } from 'vitest'
 import { z } from 'zod'
+
+// Import schemas from the actual API module - NEVER duplicate!
+import { TierSchema, KitTypeSchema } from '../lib/api'
 
 const API_BASE_URL = process.env.API_URL || 'https://aiorg.dev'
 
-// Import schemas from the actual API module to ensure we test the real thing
-// Note: These are duplicated from api.ts - if we had a shared package, we'd import from there
-const TierSchema = z.enum(['free', 'paid', 'private'])
-
+// Build schemas using imported enums
 const LatestVersionSchema = z.object({
   version: z.string(),
   releasedAt: z.string(),
@@ -26,7 +24,7 @@ const LatestVersionSchema = z.object({
   packageDisplayName: z.string(),
   changelog: z.record(z.string(), z.any()).optional(),
   tier: TierSchema.optional(),
-  type: z.enum(['template', 'companion', 'inject']).optional(),
+  type: KitTypeSchema.optional(),
 })
 
 const ListKitsSchema = z.object({
@@ -35,7 +33,7 @@ const ListKitsSchema = z.object({
     displayName: z.string(),
     description: z.string().nullable(),
     tier: TierSchema,
-    type: z.enum(['template', 'companion', 'inject']),
+    type: KitTypeSchema,
     deployMode: z.string().nullable(),
     version: z.string(),
     priceCents: z.number(),
@@ -45,6 +43,7 @@ const ListKitsSchema = z.object({
 const VerifyLicenseResponseSchema = z.object({
   valid: z.boolean(),
   email: z.string().optional(),
+  tier: TierSchema.optional(),
   kits: z.array(z.object({
     name: z.string(),
     tier: TierSchema,
@@ -198,7 +197,7 @@ describe('Schema Consistency', () => {
   test('TierSchema includes all valid tiers', () => {
     // This test documents all valid tiers
     // If you add a new tier, add it here first!
-    const validTiers = ['free', 'paid', 'private']
+    const validTiers = ['free', 'paid', 'private', 'beta']
 
     for (const tier of validTiers) {
       const result = TierSchema.safeParse(tier)
@@ -213,5 +212,21 @@ describe('Schema Consistency', () => {
       const result = TierSchema.safeParse(tier)
       expect(result.success, `Tier "${tier}" should be invalid`).toBe(false)
     }
+  })
+
+  test('beta tier is valid for all-kit access licenses', () => {
+    // Beta licenses grant access to ALL kits
+    const betaLicenseResponse = {
+      valid: true,
+      email: 'test@example.com',
+      tier: 'beta',
+      kits: [
+        { name: 'marketing-os', tier: 'paid', purchasedAt: '2026-01-01' },
+        { name: 'idea-os', tier: 'free', purchasedAt: '2026-01-01' },
+      ]
+    }
+
+    const result = VerifyLicenseResponseSchema.safeParse(betaLicenseResponse)
+    expect(result.success).toBe(true)
   })
 })
