@@ -30,11 +30,11 @@ Download and extract a kit to a folder. Free kits work without login.
 
 ```bash
 # Free kits - no login needed
-aiorg init claude-starter ~/Projects/my-project
 aiorg init idea-os ~/Projects/my-idea
 
 # Paid kits - requires login first
 aiorg init marketing-os ~/Projects/my-marketing
+aiorg init saas-dev-team ~/Projects/my-saas
 ```
 
 Options:
@@ -113,10 +113,9 @@ Your customizations and data are preserved during upgrades.
 
 | Kit | Type | Description |
 |-----|------|-------------|
-| `claude-starter` | Free | Best practices template for Claude Code |
 | `idea-os` | Free | AI-powered business idea validation |
 | `marketing-os` | Paid | AI-powered marketing automation |
-| `nextjs-supabase-saas` | Paid | Full-stack SaaS template |
+| `saas-dev-team` | Paid | Full-stack SaaS template |
 | `landing-page` | Paid | High-converting landing page |
 
 Visit [aiorg.dev](https://aiorg.dev) to purchase paid kits.
