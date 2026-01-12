@@ -51,7 +51,7 @@ export async function login(): Promise<void> {
     }
 
     // Save to config
-    const kitsRecord: Record<string, { tier: 'free' | 'paid'; purchasedAt: string }> = {}
+    const kitsRecord: Record<string, { tier: 'free' | 'paid' | 'private' | 'beta'; purchasedAt: string }> = {}
     if (result.kits) {
       for (const kit of result.kits) {
         kitsRecord[kit.name] = {

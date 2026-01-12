@@ -25,7 +25,7 @@ async function fetchWithTimeout(
   }
 }
 
-// Shared enums - keep in sync with API
+// Shared enums - keep in sync with API and database constraints
 export const TierSchema = z.enum(['free', 'paid', 'private', 'beta'])
 export const KitTypeSchema = z.enum(['template', 'companion', 'inject'])
 
