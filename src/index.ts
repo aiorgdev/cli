@@ -6,6 +6,7 @@ import { upgrade } from './commands/upgrade.js'
 import { version } from './commands/version.js'
 import { list } from './commands/list.js'
 import { status } from './commands/status.js'
+import { link } from './commands/link.js'
 import * as logger from './utils/logger.js'
 
 const cli = cac('aiorg')
@@ -94,6 +95,18 @@ cli
       await status()
     } catch (error) {
       logger.error(error instanceof Error ? error.message : 'Status check failed')
+      process.exit(1)
+    }
+  })
+
+// Link command
+cli
+  .command('link', 'Link kit to a different project')
+  .action(async () => {
+    try {
+      await link()
+    } catch (error) {
+      logger.error(error instanceof Error ? error.message : 'Link failed')
       process.exit(1)
     }
   })
