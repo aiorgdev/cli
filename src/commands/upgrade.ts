@@ -295,6 +295,34 @@ export async function upgrade(options: UpgradeOptions): Promise<void> {
 
     // Cleanup
     await cleanupTempDir(tempDir)
+
+    // Offer to commit upgrade changes
+    if (inGitRepo && !options.yes) {
+      logger.blank()
+      const shouldCommit = await p.confirm({
+        message: 'Commit upgrade changes?',
+        initialValue: true,
+      })
+
+      if (shouldCommit === true) {
+        const commitSpinner = p.spinner()
+        commitSpinner.start('Committing...')
+        const committed = await createGitBackup(
+          kit.rootPath,
+          `chore: upgrade ${kit.packageName} to v${latest.version}`
+        )
+        commitSpinner.stop(committed ? 'Changes committed' : 'Nothing to commit')
+      }
+    } else if (inGitRepo && options.yes) {
+      // Auto-commit when --yes flag is used
+      const commitSpinner = p.spinner()
+      commitSpinner.start('Committing...')
+      const committed = await createGitBackup(
+        kit.rootPath,
+        `chore: upgrade ${kit.packageName} to v${latest.version}`
+      )
+      commitSpinner.stop(committed ? 'Changes committed' : 'Nothing to commit')
+    }
   } catch (error) {
     if (tempDir) {
       await cleanupTempDir(tempDir)
