@@ -108,10 +108,10 @@ describe('API Contract Tests', () => {
       expect(result.success).toBe(true)
     })
 
-    test('private kit (investor-os) response matches schema', async () => {
+    test('paid kit (investor-os) response matches schema', async () => {
       const response = await fetch(`${API_BASE_URL}/api/kits/investor-os/latest`)
 
-      // Private kit should still return latest info (just download is restricted)
+      // Paid kit should still return latest info (just download is restricted)
       if (!response.ok) {
         console.warn('investor-os not found, skipping')
         return
@@ -125,9 +125,9 @@ describe('API Contract Tests', () => {
       }
       expect(result.success).toBe(true)
 
-      // Verify it's actually private
+      // Verify it's actually paid
       if (data.tier) {
-        expect(data.tier).toBe('private')
+        expect(data.tier).toBe('paid')
       }
     })
   })
