@@ -16,7 +16,7 @@ const AiorgFileSchema = z.object({
 // CLI creates minimal context - kits add their own fields as needed
 const ContextJsonSchema = z.object({
   version: z.string(),
-  // Business info - added by business kits (Idea OS, PMF OS, Marketing OS)
+  // Business info - added by business kits (Idea OS, Product OS, Marketing OS)
   business: z.object({
     name: z.string(),
     description: z.string().optional(),
@@ -31,7 +31,7 @@ const ContextJsonSchema = z.object({
     valueProp: z.string().optional(),
     validatedAt: z.string().optional(),
   }).optional(),
-  // PMF data - added by PMF OS
+  // PMF data - added by Product OS
   pmf: z.object({
     status: z.enum(['not-started', 'searching', 'approaching', 'achieved']).optional(),
     score: z.number().nullable().optional(),
@@ -121,7 +121,7 @@ export async function projectExists(projectName: string): Promise<boolean> {
 
 /**
  * Create a new project with minimal context
- * Business kits (Idea OS, PMF OS, Marketing OS) add their own data via /setup
+ * Business kits (Idea OS, Product OS, Marketing OS) add their own data via /setup
  */
 export async function createProject(
   projectName: string,
@@ -374,7 +374,7 @@ async function askForNewProject(
   }
 
   // Create project with minimal context
-  // Business kits (Idea OS, PMF OS, Marketing OS) will ask for business name in /setup
+  // Business kits (Idea OS, Product OS, Marketing OS) will ask for business name in /setup
   await createProject(projectName as string, kitName)
 
   return projectName as string
