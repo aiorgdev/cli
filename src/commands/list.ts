@@ -26,7 +26,7 @@ export async function list(): Promise<void> {
   const paidKits = kits.filter(k => k.tier === 'paid')
 
   logger.blank()
-  console.log(pc.bold('Available Kits'))
+  console.log(pc.bold('Kits for Claude Code'))
   logger.blank()
 
   // Free kits
