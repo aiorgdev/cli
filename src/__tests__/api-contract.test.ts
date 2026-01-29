@@ -108,12 +108,12 @@ describe('API Contract Tests', () => {
       expect(result.success).toBe(true)
     })
 
-    test('paid kit (investor-os) response matches schema', async () => {
-      const response = await fetch(`${API_BASE_URL}/api/kits/investor-os/latest`)
+    test('paid kit (marketing-os) response matches schema', async () => {
+      const response = await fetch(`${API_BASE_URL}/api/kits/marketing-os/latest`)
 
       // Paid kit should still return latest info (just download is restricted)
       if (!response.ok) {
-        console.warn('investor-os not found, skipping')
+        console.warn('marketing-os not found, skipping')
         return
       }
 
@@ -121,7 +121,7 @@ describe('API Contract Tests', () => {
       const result = LatestVersionSchema.safeParse(data)
 
       if (!result.success) {
-        console.error('Schema validation failed for investor-os:', JSON.stringify(result.error.issues, null, 2))
+        console.error('Schema validation failed for marketing-os:', JSON.stringify(result.error.issues, null, 2))
       }
       expect(result.success).toBe(true)
 
