@@ -1,7 +1,8 @@
 {
   "name": "@aiorg/cli",
-  "version": "1.6.1",
-  "description": "CLI for downloading and upgrading aiorg kits",
+  "version": "1.6.3",
+  "description": "CLI for downloading and managing AI starter kits for Claude Code. Build SaaS, validate ideas, run marketing - all with AI.",
+  "homepage": "https://aiorg.dev",
   "type": "module",
   "publishConfig": {
     "access": "public"
@@ -25,13 +26,25 @@
     "aiorg",
     "cli",
     "claude",
-    "starter-kit"
+    "claude-code",
+    "starter-kit",
+    "saas",
+    "ai",
+    "founder-tools",
+    "boilerplate",
+    "developer-tools"
   ],
-  "author": "aiorg.dev",
+  "author": {
+    "name": "AI Org",
+    "url": "https://aiorg.dev"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aiorgdev/cli"
+    "url": "git+https://github.com/aiorgdev/cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aiorgdev/cli/issues"
   },
   "engines": {
     "node": ">=18"
