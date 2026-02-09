@@ -1,7 +1,7 @@
 {
   "name": "@aiorg/cli",
-  "version": "1.6.3",
-  "description": "CLI for downloading and managing AI starter kits for Claude Code. Build SaaS, validate ideas, run marketing - all with AI.",
+  "version": "1.6.4",
+  "description": "Install and manage autonomous AI teams for Claude Code. Each team is a specialist — marketing, dev, QA, product, support — that executes, not just advises.",
   "homepage": "https://aiorg.dev",
   "type": "module",
   "publishConfig": {
@@ -27,7 +27,8 @@
     "cli",
     "claude",
     "claude-code",
-    "starter-kit",
+    "ai-teams",
+    "autonomous-ai",
     "saas",
     "ai",
     "founder-tools",
