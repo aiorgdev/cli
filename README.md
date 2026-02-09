@@ -1,5 +1,9 @@
 # @aiorg/cli
 
+[![npm](https://img.shields.io/npm/v/@aiorg/cli)](https://www.npmjs.com/package/@aiorg/cli)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Claude Code](https://img.shields.io/badge/built%20for-Claude%20Code-blueviolet)](https://docs.anthropic.com/en/docs/claude-code)
+
 Official CLI for downloading and managing [aiorg](https://aiorg.dev) kits - Claude Code starter kits for founders.
 
 ## Installation
@@ -113,17 +117,28 @@ Your customizations and data are preserved during upgrades.
 
 | Kit | Type | Description |
 |-----|------|-------------|
-| `idea-os` | Free | AI-powered business idea validation |
-| `marketing-os` | Paid | AI-powered marketing automation |
-| `saas-dev-team` | Paid | Full-stack SaaS template |
-| `landing-page` | Paid | High-converting landing page |
+| [`idea-os`](https://aiorg.dev/kits/idea-os) | Free | AI-powered business idea validation |
+| [`landing-page`](https://aiorg.dev/kits/landing-page) | Free | GEO optimization for Astro projects |
+| [`marketing-os`](https://aiorg.dev/kits/marketing-os) | Paid | AI-powered marketing automation |
+| [`saas-dev-team`](https://aiorg.dev/kits/saas-starter) | Paid | Full-stack SaaS template |
+| [`product-os`](https://aiorg.dev/kits/product-os) | Paid | Product management with AI |
+| [`qa-team`](https://aiorg.dev/kits/qa-team) | Paid | AI-powered QA testing |
+| [`support-team`](https://aiorg.dev/kits/support-team) | Paid | AI customer support |
+| [`investor-os`](https://aiorg.dev/kits/investor-os) | Paid | Fundraising preparation |
 
-Visit [aiorg.dev](https://aiorg.dev) to purchase paid kits.
+Visit [aiorg.dev](https://aiorg.dev) to see all kits.
 
 ## Requirements
 
 - Node.js 18+
 - npm, pnpm, or yarn
+
+## Links
+
+- **Website:** [aiorg.dev](https://aiorg.dev)
+- **Documentation:** [aiorg.dev/docs](https://aiorg.dev/docs)
+- **All kits:** [aiorg.dev/#kits](https://aiorg.dev/#kits)
+- **Issues:** [github.com/aiorgdev/cli/issues](https://github.com/aiorgdev/cli/issues)
 
 ## License
 
