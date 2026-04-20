@@ -14,6 +14,7 @@ import {
 } from '../lib/extract.js'
 import { setupProject } from '../lib/project.js'
 import { detectKit } from '../lib/detect.js'
+import { ensureRuntime, runPostUpgrade, formatRuntimeError } from '../lib/runtime.js'
 import * as logger from '../utils/logger.js'
 import { login } from './login.js'
 
@@ -116,13 +117,50 @@ export async function init(
     throw error
   }
 
+  // Runtime toolchain checks + postUpgrade (e.g. `uv sync --frozen` for Python kits).
+  // We run this AFTER extract but BEFORE the success message so a missing
+  // toolchain shows as an install-time failure, not a silent half-install.
+  const installedKit = await detectKit(resolvedPath)
+  if (installedKit?.kitJson) {
+    try {
+      ensureRuntime(installedKit.kitJson)
+    } catch (err) {
+      const { message, hint } = formatRuntimeError(err)
+      logger.blank()
+      logger.error(message)
+      if (hint) {
+        logger.blank()
+        logger.log(pc.dim(hint))
+      }
+      process.exit(1)
+    }
+
+    if (installedKit.kitJson.postUpgrade && installedKit.kitJson.postUpgrade.length > 0) {
+      logger.blank()
+      logger.log(pc.dim('Running post-install hooks:'))
+      try {
+        runPostUpgrade(installedKit.kitJson, resolvedPath, (command) => {
+          logger.listItem(pc.dim(`$ ${command}`))
+        })
+      } catch (err) {
+        const { message, hint } = formatRuntimeError(err)
+        logger.blank()
+        logger.error(message)
+        if (hint) {
+          logger.blank()
+          logger.log(pc.dim(hint))
+        }
+        process.exit(1)
+      }
+    }
+  }
+
   // Success message
   logger.blank()
   logger.success(`${versionInfo.packageDisplayName} v${versionInfo.version} installed!`)
 
   // Setup project linking (for kit ecosystem)
   // Personal kits (like Investor OS) skip this - they don't need shared business context
-  const installedKit = await detectKit(resolvedPath)
   if (!installedKit?.isPersonal) {
     await setupProject(resolvedPath, kitName)
   }

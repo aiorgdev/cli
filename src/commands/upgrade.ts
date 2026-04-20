@@ -15,6 +15,7 @@ import {
 } from '../lib/extract.js'
 import { applyFileCategories, isGitRepo, createGitBackup } from '../lib/apply.js'
 import { needsProjectMigration, migrateToProjectSystem, readAiorgFile, addKitToProject } from '../lib/project.js'
+import { ensureRuntime, runPostUpgrade, formatRuntimeError } from '../lib/runtime.js'
 import * as logger from '../utils/logger.js'
 import { login } from './login.js'
 
@@ -259,6 +260,47 @@ export async function upgrade(options: UpgradeOptions): Promise<void> {
       newKit.versionJson
     )
     spinner.stop('Updates applied')
+
+    // Re-detect the kit at its live path now that new files are in place —
+    // kit.json may have shipped new runtime requirements / postUpgrade hooks.
+    const upgradedKit = await detectKit(kit.rootPath)
+    if (upgradedKit?.kitJson) {
+      try {
+        ensureRuntime(upgradedKit.kitJson)
+      } catch (err) {
+        const { message, hint } = formatRuntimeError(err)
+        logger.blank()
+        logger.error(message)
+        if (hint) {
+          logger.blank()
+          logger.log(pc.dim(hint))
+        }
+        // Clean up and exit — a broken runtime means the user can't use the
+        // kit anyway; better to surface the problem immediately.
+        await cleanupTempDir(tempDir)
+        process.exit(1)
+      }
+
+      if (upgradedKit.kitJson.postUpgrade && upgradedKit.kitJson.postUpgrade.length > 0) {
+        logger.blank()
+        logger.log(pc.dim('Running post-upgrade hooks:'))
+        try {
+          runPostUpgrade(upgradedKit.kitJson, kit.rootPath, (command) => {
+            logger.listItem(pc.dim(`$ ${command}`))
+          })
+        } catch (err) {
+          const { message, hint } = formatRuntimeError(err)
+          logger.blank()
+          logger.error(message)
+          if (hint) {
+            logger.blank()
+            logger.log(pc.dim(hint))
+          }
+          await cleanupTempDir(tempDir)
+          process.exit(1)
+        }
+      }
+    }
 
     // Write upgrade marker for "what's new" on next Claude session
     const markerPath = path.join(kit.rootPath, '.upgrade-marker.json')

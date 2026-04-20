@@ -26,6 +26,19 @@ const KitJsonSchema = z.object({
   // Personal kits (like Investor OS) don't need project linking
   // They work standalone without shared business context
   personal: z.boolean().optional(),
+  // Runtime lets a kit declare it needs a specific language toolchain.
+  // Default is 'node' (legacy — most kits are JS/TS). 'python' triggers
+  // post-install checks (uv, python version) and runs `postUpgrade`
+  // commands to sync deps. See lib/runtime.ts for enforcement.
+  runtime: z.enum(['node', 'python']).optional(),
+  // Minimum Python version (semver-style: '3.11', '3.12'). Only checked
+  // when runtime === 'python'.
+  pythonMin: z.string().optional(),
+  // Shell commands to run in the installed kit directory after extract
+  // or upgrade. Intended for dependency sync (`uv sync --frozen`,
+  // `pnpm install`). All commands must exit 0 — any failure aborts the
+  // install/upgrade.
+  postUpgrade: z.array(z.string()).optional(),
 })
 
 export type VersionJson = z.infer<typeof VersionJsonSchema>
