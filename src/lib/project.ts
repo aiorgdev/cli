@@ -276,6 +276,18 @@ export async function setupProject(
     return existingAiorg.project
   }
 
+  // Project linking is an interactive-only flow (select prompt / text input).
+  // In non-TTY environments (CI, piped stdin, child processes) skip with a
+  // hint — the kit is already fully installed; project linking can be done
+  // later via `aiorg link`.
+  if (!process.stdin.isTTY) {
+    if (!options.silent) {
+      logger.blank()
+      logger.info('Skipping project linking (no TTY). Run `aiorg link` later if needed.')
+    }
+    return null
+  }
+
   // Initialize ~/.aiorg/ if needed
   await initializeAiorg()
 

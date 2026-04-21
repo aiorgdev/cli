@@ -1,6 +1,6 @@
 {
   "name": "@aiorg/cli",
-  "version": "1.6.4",
+  "version": "1.7.0",
   "description": "Install and manage autonomous AI teams for Claude Code. Each team is a specialist — marketing, dev, QA, product, support — that executes, not just advises.",
   "homepage": "https://aiorg.dev",
   "type": "module",

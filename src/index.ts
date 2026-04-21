@@ -13,10 +13,10 @@ const cli = cac('aiorg')
 
 // Login command
 cli
-  .command('login', 'Save your license key')
-  .action(async () => {
+  .command('login [key]', 'Save your license key')
+  .action(async (key: string | undefined) => {
     try {
-      await login()
+      await login(key)
     } catch (error) {
       logger.error(error instanceof Error ? error.message : 'Login failed')
       process.exit(1)

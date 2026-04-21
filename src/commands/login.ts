@@ -4,37 +4,65 @@ import { verifyLicense } from '../lib/api.js'
 import { saveLicenseKey, isLoggedIn, loadConfig } from '../lib/auth.js'
 import * as logger from '../utils/logger.js'
 
-export async function login(): Promise<void> {
+export async function login(providedKey?: string): Promise<void> {
   p.intro(pc.cyan('aiorg login'))
 
-  // Check if already logged in
+  const isInteractive = Boolean(process.stdin.isTTY)
+
+  // Check if already logged in — interactive confirms, non-interactive
+  // with a new key overwrites silently (scripted/CI use).
   if (await isLoggedIn()) {
     const config = await loadConfig()
-    const shouldContinue = await p.confirm({
-      message: `Already logged in${config?.email ? ` as ${pc.cyan(config.email)}` : ''}. Replace license key?`,
-      initialValue: false,
-    })
+    if (providedKey) {
+      logger.info(
+        `Replacing existing login${config?.email ? ` (${config.email})` : ''}`,
+      )
+    } else if (isInteractive) {
+      const shouldContinue = await p.confirm({
+        message: `Already logged in${config?.email ? ` as ${pc.cyan(config.email)}` : ''}. Replace license key?`,
+        initialValue: false,
+      })
 
-    if (p.isCancel(shouldContinue) || !shouldContinue) {
-      p.outro('Login cancelled')
-      return
+      if (p.isCancel(shouldContinue) || !shouldContinue) {
+        p.outro('Login cancelled')
+        return
+      }
+    } else {
+      logger.error(
+        `Already logged in${config?.email ? ` as ${config.email}` : ''}. Pass the new key as an argument to replace it.`,
+      )
+      process.exit(1)
     }
   }
 
-  // Get license key
-  const licenseKey = await p.text({
-    message: 'Enter your license key',
-    placeholder: 'ak_live_xxxxx',
-    validate: (value) => {
-      if (!value) return 'License key is required'
-      if (!value.startsWith('ak_')) return 'License key should start with "ak_"'
-      return undefined
-    },
-  })
+  // Get license key — from arg when provided, otherwise interactive prompt.
+  // Non-interactive terminals (CI, spawned child processes) must pass the key.
+  let licenseKey: string
+  if (providedKey) {
+    if (!providedKey.startsWith('ak_')) {
+      logger.error('License key should start with "ak_"')
+      process.exit(1)
+    }
+    licenseKey = providedKey
+  } else if (!isInteractive) {
+    logger.error('No TTY detected. Pass your key as an argument: aiorg login <key>')
+    process.exit(1)
+  } else {
+    const prompted = await p.text({
+      message: 'Enter your license key',
+      placeholder: 'ak_live_xxxxx',
+      validate: (value) => {
+        if (!value) return 'License key is required'
+        if (!value.startsWith('ak_')) return 'License key should start with "ak_"'
+        return undefined
+      },
+    })
 
-  if (p.isCancel(licenseKey)) {
-    p.cancel('Login cancelled')
-    process.exit(0)
+    if (p.isCancel(prompted)) {
+      p.cancel('Login cancelled')
+      process.exit(0)
+    }
+    licenseKey = prompted
   }
 
   // Verify with API
